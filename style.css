@@ -1,0 +1,78 @@
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+body { 
+    background-color: #000; color: #33ff33; 
+    font-family: 'Press Start 2P', 'Kanit', cursive;
+    margin: 0; width: 100vw; height: 100vh;
+    overflow: hidden; display: block; /* เปลี่ยนจาก flex เป็น block */
+}
+
+/* จัดกึ่งกลางหน้าจอแบบ Absolute */
+.overlay, .modal-overlay, .game-container {
+    position: fixed; top: 50%; left: 50%;
+    transform: translate(-50%, -50%); /* บังคับอยู่กลางจอเป๊ะๆ */
+    width: 100%; height: 100%;
+    display: flex; flex-direction: column; 
+    justify-content: center; align-items: center; z-index: 10;
+}
+
+.overlay { background: rgba(0, 0, 0, 0.95); }
+.modal-overlay { background: rgba(0, 0, 0, 0.85); z-index: 100; }
+
+.game-wrapper {
+    display: flex; flex-direction: column; align-items: center;
+    width: 95vmin; max-width: 500px; /* ล็อคขนาดสูงสุด */
+}
+
+.retro-title { font-size: 24px; text-shadow: 4px 4px #ff0055; margin-bottom: 30px; text-align: center; }
+
+button {
+    display: block; width: 260px; padding: 18px; margin: 10px auto;
+    background: transparent; color: #33ff33; border: 4px solid #33ff33;
+    font-family: inherit; cursor: pointer; font-size: 12px;
+}
+button:active { background: #33ff33; color: #000; }
+
+.stats-bar { 
+    display: flex; justify-content: space-between; align-items: center;
+    width: 100%; margin-bottom: 10px; font-size: 10px;
+}
+
+.mini-btn { width: auto; padding: 8px; font-size: 8px; margin: 0; border-width: 2px; }
+
+/* กระดาน: ล็อคสัดส่วน 1:1 */
+.board { 
+    display: grid; 
+    grid-template-columns: repeat(8, 1fr); 
+    grid-template-rows: repeat(8, 1fr);
+    width: 90vmin; height: 90vmin;
+    max-width: 480px; max-height: 480px;
+    border: 6px solid #33ff33; 
+    box-shadow: 0 0 20px rgba(51, 255, 51, 0.3);
+    touch-action: manipulation;
+}
+
+.cell { display: flex; justify-content: center; align-items: center; }
+.black-cell { background-color: #111; }
+.white-cell { background-color: #1a1a1a; }
+
+.piece { 
+    width: 80%; height: 80%; border-radius: 50%; position: relative;
+    box-shadow: 0 4px 0px rgba(0,0,0,0.6);
+}
+.white-piece { background: radial-gradient(circle at 30% 30%, #fff, #888); border: 2px solid #555; }
+.black-piece { background: radial-gradient(circle at 30% 30%, #444, #000); border: 2px solid #000; }
+
+.king::after { 
+    content: '★'; color: #ff0055; font-size: 18px; 
+    position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+}
+
+.selected { border: 3px dashed #ff0055; transform: scale(1.05); animation: blink 0.4s infinite; }
+@keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+
+.modal-content { background: #000; border: 4px solid #ff0055; padding: 30px; text-align: center; width: 85%; max-width: 400px; }
+
+@media (min-width: 600px) {
+    .retro-title { font-size: 32px; }
+}
