@@ -16,6 +16,7 @@
             <button onclick="startGame(1)">EASY</button>
             <button onclick="startGame(4)">NORMAL</button>
             <button onclick="startGame(8)">HARD (AI SMART)</button>
+            <button id="start-sound-btn" onclick="toggleSound()">🔊 SOUND: ON</button>
         </div>
     </div>
 
@@ -24,7 +25,10 @@
             <div class="stats-bar">
                 <span id="status">YOUR TURN</span>
                 <div class="score">W: <span id="white-count">8</span> | B: <span id="black-count">8</span></div>
-                <button class="mini-btn" onclick="backToMenu()">MENU</button>
+                <div class="actions">
+                    <button class="mini-btn" id="game-sound-btn" onclick="toggleSound()">🔊 ON</button>
+                    <button class="mini-btn" onclick="backToMenu()">MENU</button>
+                </div>
             </div>
             <div id="board" class="board"></div>
         </div>
