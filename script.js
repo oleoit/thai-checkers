@@ -26,8 +26,8 @@ function toggleSound() {
 function updateSoundUI() {
     const startBtn = document.getElementById('start-sound-btn');
     const gameBtn = document.getElementById('game-sound-btn');
-    if (startBtn) startBtn.innerText = soundEnabled ? "🔊 SOUND: ON" : "🔇 SOUND: OFF";
-    if (gameBtn) gameBtn.innerText = soundEnabled ? "🔊 ON" : "🔇 OFF";
+    if (startBtn) startBtn.innerText = soundEnabled ? "🔊 เสียง: เปิด" : "🔇 เสียง: ปิด";
+    if (gameBtn) gameBtn.innerText = soundEnabled ? "🔊" : "🔇";
 }
 
 function playTone(freq, type, duration, gainVal = 0.15, endFreq = null) {
@@ -129,8 +129,24 @@ function startGame(diff) {
 function backToMenu() {
     gameActive = false;
     document.getElementById('retro-modal').style.display = 'none';
+    const rulesModal = document.getElementById('rules-modal');
+    if (rulesModal) rulesModal.style.display = 'none';
     document.getElementById('start-screen').style.display = 'flex';
     document.getElementById('game-ui').style.display = 'none';
+}
+
+function openRules() {
+    initAudio();
+    playTone(440, 'triangle', 0.1, 0.15);
+    const modal = document.getElementById('rules-modal');
+    if (modal) modal.style.display = 'flex';
+}
+
+function closeRules() {
+    initAudio();
+    playTone(330, 'triangle', 0.08, 0.15);
+    const modal = document.getElementById('rules-modal');
+    if (modal) modal.style.display = 'none';
 }
 
 function initGame() {
@@ -154,6 +170,13 @@ function initGame() {
     turn = 'white'; 
     isMultiJump = false; 
     selected = null; 
+    
+    document.getElementById('status').innerText = "ตาของคุณ";
+    const badge = document.getElementById('status-badge');
+    if (badge) badge.classList.remove('ai-turn');
+    document.getElementById('white-count').innerText = "8";
+    document.getElementById('black-count').innerText = "8";
+    
     render();
 }
 
@@ -620,7 +643,7 @@ function handleSquareClick(r, c) {
             let allMoves = getAllMoves(board, 1, isMultiJump ? selected : null, isMultiJump);
             let jumps = allMoves.filter(m => m.data.capture);
             if (jumps.length > 0 && !res.capture) {
-                alert("ต้องกินหมากฝ่ายตรงข้ามก่อน!");
+                showGameToast("กฎบังคับกิน!", "ต้องกินหมากฝ่ายตรงข้ามก่อน!");
                 return;
             }
             executeMove(selected.r, selected.c, r, c, res);
@@ -660,13 +683,49 @@ function executeMove(fr, fc, tr, tc, res) {
     render();
 }
 
+// ธีมกระดานสว่าง (Bright Board Themes)
+const THEMES = [
+    { id: 'theme-oak', name: '🎨 ไม้สว่าง (Oak)' },
+    { id: 'theme-green', name: '🎨 เขียวสว่าง (Sage)' },
+    { id: 'theme-birch', name: '🎨 เบิร์ชสว่าง (Birch)' }
+];
+let currentThemeIndex = 0;
+
+function applyTheme(index) {
+    currentThemeIndex = index % THEMES.length;
+    const theme = THEMES[currentThemeIndex];
+    const boardEl = document.getElementById('board');
+    if (boardEl) {
+        THEMES.forEach(t => boardEl.classList.remove(t.id));
+        boardEl.classList.add(theme.id);
+    }
+    const startThemeBtn = document.getElementById('start-theme-btn');
+    if (startThemeBtn) startThemeBtn.innerText = theme.name;
+    const gameThemeBtn = document.getElementById('game-theme-btn');
+    if (gameThemeBtn) {
+        gameThemeBtn.innerText = "🎨 ธีม";
+        gameThemeBtn.title = `เปลี่ยนสีกระดาน (ปัจจุบัน: ${theme.name.replace('🎨 ', '')})`;
+    }
+}
+
+function cycleTheme() {
+    applyTheme(currentThemeIndex + 1);
+}
+
 function endTurn() {
     isMultiJump = false; 
     selected = null; 
     if (checkWinner()) return;
     
     turn = (turn === 'white' ? 'black' : 'white');
-    document.getElementById('status').innerText = (turn === 'white' ? "YOUR TURN" : "CPU THINKING");
+    const statusText = (turn === 'white' ? "ตาของคุณ" : "บอทกำลังคิด...");
+    document.getElementById('status').innerText = statusText;
+    
+    const badge = document.getElementById('status-badge');
+    if (badge) {
+        if (turn === 'white') badge.classList.remove('ai-turn');
+        else badge.classList.add('ai-turn');
+    }
     
     if (turn === 'black') {
         setTimeout(aiAction, 400);
@@ -690,32 +749,88 @@ function checkWinner() {
 
     if (w === 0 || !whiteCanMove) {
         playDefeatSound();
-        showRetroModal("GAME OVER", "คุณพ่ายแพ้ให้กับระบบ AI!");
+        showRetroModal("GAME OVER", "คุณพ่ายแพ้ให้กับระบบ AI!", false);
         gameActive = false;
         return true;
     }
     if (b === 0 || !blackCanMove) {
         playVictorySound();
-        showRetroModal("VICTORY", "คุณชนะ! บอทไม่สามารถเดินต่อได้");
+        showRetroModal("VICTORY", "ยินดีด้วย! คุณชนะบอท AI สำเร็จ", true);
         gameActive = false;
         return true;
     }
     return false;
 }
 
-function showRetroModal(title, message) {
+function showRetroModal(title, message, isVictory = false) {
     document.getElementById('modal-title').innerText = title;
     document.getElementById('modal-message').innerText = message;
+    const iconEl = document.getElementById('modal-icon');
+    if (iconEl) iconEl.innerText = isVictory ? "🏆" : "💀";
     document.getElementById('retro-modal').style.display = 'flex';
+}
+
+let toastTimeout = null;
+function showGameToast(title = "กฎบังคับกิน!", message = "ต้องกินหมากฝ่ายตรงข้ามก่อน!") {
+    const toast = document.getElementById('game-toast');
+    if (!toast) return;
+
+    // เสียงแจ้งเตือนเตือนสติสไตล์เรโทร (8-bit Warning Buzz)
+    playTone(280, 'sawtooth', 0.12, 0.18, 140);
+
+    const titleEl = toast.querySelector('.toast-title');
+    const descEl = document.getElementById('toast-message');
+    if (titleEl) titleEl.innerText = title;
+    if (descEl) descEl.innerText = message;
+
+    toast.classList.remove('show');
+    void toast.offsetWidth; // Force reflow
+    toast.classList.add('show');
+
+    if (toastTimeout) clearTimeout(toastTimeout);
+    toastTimeout = setTimeout(() => {
+        toast.classList.remove('show');
+    }, 2000);
 }
 
 function render() {
     const bEl = document.getElementById('board'); 
     bEl.innerHTML = '';
+    
+    // คำนวณตำแหน่งที่สามารถเดินหรือกินได้สำหรับตัวหมากที่ถูกเลือก
+    let validTargets = [];
+    if (selected && gameActive && turn === 'white') {
+        const moves = getAllMoves(board, 1, selected, isMultiJump);
+        validTargets = moves.map(m => ({ r: m.tr, c: m.tc, isCapture: m.data.capture }));
+    }
+
+    // ข้อความแนะนำด้านล่างกระดาน
+    const hintEl = document.getElementById('hint-text');
+    if (hintEl) {
+        if (isMultiJump) {
+            hintEl.innerText = "⚡ กินต่อเนื่อง! เลือกช่องที่สามารถกินต่อได้";
+        } else if (selected) {
+            hintEl.innerText = validTargets.length > 0 
+                ? `👉 แตะช่องเป้าหมายเพื่อเดิน (${validTargets.length} ตาเดิน)` 
+                : "⚠️ ตัวนี้ไม่มีตาเดินที่ถูกต้อง ลองเลือกตัวอื่น";
+        } else {
+            hintEl.innerText = "💡 แตะที่ตัวหมากเพื่อดูช่องที่เดินได้";
+        }
+    }
+
     for (let r = 0; r < 8; r++) {
         for (let c = 0; c < 8; c++) {
             const cell = document.createElement('div'); 
             cell.className = `cell ${(r + c) % 2 === 0 ? 'white-cell' : 'black-cell'}`;
+            
+            // แสดงจุดแนะนำการเดินบนกระดาน
+            const target = validTargets.find(t => t.r === r && t.c === c);
+            if (target) {
+                const hint = document.createElement('div');
+                hint.className = `move-hint ${target.isCapture ? 'capture-hint' : ''}`;
+                cell.appendChild(hint);
+            }
+
             const p = board[r][c];
             if (p !== 0) {
                 const d = document.createElement('div'); 
