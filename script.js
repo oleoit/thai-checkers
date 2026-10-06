@@ -149,6 +149,25 @@ function closeRules() {
     if (modal) modal.style.display = 'none';
 }
 
+// ระบบสุ่มและกำหนดฝ่ายเริ่มก่อน ('random' = สุ่ม, 'white' = ผู้เล่น, 'black' = บอท)
+let startTurnSetting = 'random';
+const START_TURN_MODES = [
+    { id: 'random', label: '🎲 เริ่ม: สุ่ม' },
+    { id: 'white', label: '⚪ เริ่ม: ผู้เล่น' },
+    { id: 'black', label: '⚫ เริ่ม: บอท AI' }
+];
+
+function cycleStartTurn() {
+    initAudio();
+    playTone(400, 'triangle', 0.08, 0.15);
+    const currentIndex = START_TURN_MODES.findIndex(m => m.id === startTurnSetting);
+    const nextIndex = (currentIndex + 1) % START_TURN_MODES.length;
+    startTurnSetting = START_TURN_MODES[nextIndex].id;
+    
+    const btn = document.getElementById('start-turn-btn');
+    if (btn) btn.innerText = START_TURN_MODES[nextIndex].label;
+}
+
 function initGame() {
     // สร้างกระดาน 8x8 (0=ว่าง, 1=ขาวปกติ, 2=ดำปกติ, 3=ขาวฮอส, 4=ดำฮอส)
     board = Array(8).fill(null).map(() => Array(8).fill(0));
@@ -167,15 +186,35 @@ function initGame() {
         }
     }
             
-    turn = 'white'; 
     isMultiJump = false; 
     selected = null; 
     
-    document.getElementById('status').innerText = "ตาของคุณ";
-    const badge = document.getElementById('status-badge');
-    if (badge) badge.classList.remove('ai-turn');
     document.getElementById('white-count').innerText = "8";
     document.getElementById('black-count').innerText = "8";
+
+    // สุ่มหรือกำหนดฝ่ายเริ่มก่อน
+    let playerStarts = true;
+    if (startTurnSetting === 'random') {
+        playerStarts = (Math.random() < 0.5);
+    } else {
+        playerStarts = (startTurnSetting === 'white');
+    }
+
+    turn = playerStarts ? 'white' : 'black';
+
+    const statusEl = document.getElementById('status');
+    const badge = document.getElementById('status-badge');
+
+    if (turn === 'white') {
+        if (statusEl) statusEl.innerText = "ตาของคุณ";
+        if (badge) badge.classList.remove('ai-turn');
+        showGameToast("🎲 เริ่มก่อน", "คุณได้เดินก่อน (ฝ่ายขาว)");
+    } else {
+        if (statusEl) statusEl.innerText = "บอทกำลังคิด...";
+        if (badge) badge.classList.add('ai-turn');
+        showGameToast("🎲 เริ่มก่อน", "บอท AI ได้เดินก่อน (ฝ่ายดำ)");
+        setTimeout(aiAction, 900);
+    }
     
     render();
 }
