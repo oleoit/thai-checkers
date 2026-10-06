@@ -343,6 +343,69 @@ button {
 }
 
 /* ----------------------------------------------------
+   OLELab Link Banner
+   ---------------------------------------------------- */
+.olelab-banner {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 14px;
+    padding: 10px 14px;
+    background: linear-gradient(135deg, rgba(30, 41, 59, 0.75) 0%, rgba(15, 23, 42, 0.85) 100%);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 12px;
+    text-decoration: none;
+    color: #cbd5e1;
+    font-size: 12.5px;
+    font-family: 'Kanit', sans-serif;
+    transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+    cursor: pointer !important;
+    user-select: none;
+}
+
+.olelab-banner:hover {
+    cursor: pointer !important;
+    background: linear-gradient(135deg, rgba(59, 130, 246, 0.2) 0%, rgba(15, 23, 42, 0.95) 100%);
+    border-color: rgba(96, 165, 250, 0.5);
+    color: #93c5fd;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(59, 130, 246, 0.3);
+}
+
+.olelab-banner:active {
+    transform: translateY(1px);
+}
+
+.olelab-icon {
+    font-size: 15px;
+    line-height: 1;
+}
+
+.olelab-text {
+    flex: 1;
+    text-align: center;
+}
+
+.olelab-text b {
+    color: #60a5fa;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+}
+
+.olelab-arrow {
+    font-size: 14px;
+    color: #94a3b8;
+    transition: transform 0.2s ease, color 0.2s ease;
+}
+
+.olelab-banner:hover .olelab-arrow {
+    transform: translate(2px, -2px);
+    color: #60a5fa;
+}
+
+/* ----------------------------------------------------
    Stats Bar & Game UI
    ---------------------------------------------------- */
 .stats-bar { 
